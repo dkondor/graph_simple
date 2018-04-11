@@ -69,14 +69,14 @@ class graph {
 		 * 		generated / read from a file on the fly. In this case, there is no additional
 		 * 		memory requirement over storing the graph. */
 		template<class it, class sent>
-		int create_graph_partitioned(it e, sent end, std::unordered_map<unsigned int,unsigned int>* ids_map);
+		int create_graph_partitioned(it& e, const sent& end, std::unordered_map<unsigned int,unsigned int>* ids_map);
 		 
 		 /* 2. From general input supplied by random access iterators (to std::pair<unsigned int,unsigned int>).
 		 * 		In this case, these iterators are used to sort the input. In this case, the additional
 		 * 		memory requirement is that of the container of the iterators given, typically
 		 * 		8 bytes / edge. */
 		template<class it, class sent>
-		int create_graph_in_place_sort(it e, sent end, std::unordered_map<unsigned int,unsigned int>* ids_map);
+		int create_graph_in_place_sort(it& e, const sent& end, std::unordered_map<unsigned int,unsigned int>* ids_map);
 		 
 		 /*  3. From general input supplied by a pair of forward iterators;
 		 * 		in this case, all edges are copied into temporary arrays and sorted there, so again
@@ -84,7 +84,7 @@ class graph {
 		 * 		in this case, there is an additional 4 bytes / edge memory requirement during creating
 		 * 		the graph */
 		template<class it, class sent>
-		int create_graph_copy_sort(it e, sent end, std::unordered_map<unsigned int,unsigned int>* ids_map);
+		int create_graph_copy_sort(it& e, const sent& end, std::unordered_map<unsigned int,unsigned int>* ids_map);
 		  
 		 /*	4. from general input supplied as std::vectors / C arrays:
 		 * 		edges should be supplied as two separate arrays or vector (i.e. edge i points from
@@ -195,7 +195,7 @@ class graph {
 		 * If ids_map is not null, ids are replaced and the map is filled with the mapping;
 		 * otherwise, ids are allocated up to the maximum of the id found in the input */
 		template<class it, class sent>
-		int create_graph_sorted(it e, sent end, std::unordered_map<unsigned int,unsigned int>* ids_map, bool copy_out_edges);
+		int create_graph_sorted(it& e, const sent& end, std::unordered_map<unsigned int,unsigned int>* ids_map, bool copy_out_edges);
 	
 		/* 3-4. common interface for creating the edges after copying the out-edges to the edges array and using a separate in-edges array */
 		int create_graph(unsigned int* in_edges, std::unordered_map<unsigned int,unsigned int>* ids_map);
@@ -284,7 +284,7 @@ class graph {
 /* templated functions for creating the graph */
 
 template<class it, class sent>
-int graph::create_graph_sorted(it e, sent end, std::unordered_map<unsigned int,unsigned int>* ids_map, bool copy_out_edges) {
+int graph::create_graph_sorted(it& e, const sent& end, std::unordered_map<unsigned int,unsigned int>* ids_map, bool copy_out_edges) {
 	if(grow_nodes()) { fprintf(stderr,"graph::create_graph_sorted(): could not allocate memory!\n"); return 1; }
 	if(copy_out_edges) if(grow_edges()) { fprintf(stderr,"graph::create_graph_sorted(): could not allocate memory!\n"); return 1; }
 	if(ids_map) ids_map->clear();
@@ -293,7 +293,7 @@ int graph::create_graph_sorted(it e, sent end, std::unordered_map<unsigned int,u
 	unsigned int last_id = 0;
 	unsigned int deg = 0;
 	unsigned int i = 0; // node index
-	uint64_t j; // edge index
+	uint64_t j = 0; // edge index
 	bool first = true;
 	unsigned int max_out_edge = 0;
 	
@@ -375,7 +375,7 @@ int graph::create_graph_sorted(it e, sent end, std::unordered_map<unsigned int,u
 		
 
 template<class it, class sent>
-int graph::create_graph_partitioned(it e, sent end, std::unordered_map<unsigned int,unsigned int>* ids_map) {
+int graph::create_graph_partitioned(it& e, const sent& end, std::unordered_map<unsigned int,unsigned int>* ids_map) {
 	clear();
 	return create_graph_sorted(e,end,ids_map,true);
 }
@@ -384,7 +384,7 @@ int graph::create_graph_partitioned(it e, sent end, std::unordered_map<unsigned 
 /* 2. Create graph with sorting the edges using the supplied iterators (which should be random access
  * 	iterators to std::pair<unsigned int, unsigned int>) */
 template<class it, class sent>
-int graph::create_graph_in_place_sort(it e, sent end, std::unordered_map<unsigned int,unsigned int>* ids_map) {
+int graph::create_graph_in_place_sort(it& e, const sent& end, std::unordered_map<unsigned int,unsigned int>* ids_map) {
 	clear();
 	std::sort(e,end,[](const std::pair<unsigned int,unsigned int> a, const std::pair<unsigned int,unsigned int> b) {
 			return a.first < b.first;
@@ -397,7 +397,7 @@ int graph::create_graph_in_place_sort(it e, sent end, std::unordered_map<unsigne
  * the iterators should be forward iterators, ideally generating the data on the fly, as it will be
  * copied into temporary arrays */
 template<class it, class sent>
-int graph::create_graph_copy_sort(it e, sent end, std::unordered_map<unsigned int,unsigned int>* ids_map) {
+int graph::create_graph_copy_sort(it& e, const sent& end, std::unordered_map<unsigned int,unsigned int>* ids_map) {
 	clear();
 	
 	/* copy all data into the edges and temporary arrays */
