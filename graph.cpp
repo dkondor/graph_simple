@@ -398,10 +398,19 @@ int graph::make_symmetric() {
 	if(extra_size == 0) return 0; /* no extra edges need to be added */
 	/* 2. realloc the edges array, alloc temporary space for old node degrees */
 	size_t old_size = nedges;
-	if(nedges + extra_size > edges_size) {
-		unsigned int* tmp1 = (unsigned int*)realloc(edges,(nedges + extra_size)*sizeof(unsigned int));
-		if(!tmp1) return 1;
-		edges = tmp1;
+	if(edges_owned) {
+		if(nedges + extra_size > edges_size) {
+			unsigned int* tmp1 = (unsigned int*)realloc(edges,(nedges + extra_size)*sizeof(unsigned int));
+			if(!tmp1) return 1;
+			edges = tmp1;
+			nedges += extra_size;
+			edges_size = nedges;
+		}
+		else nedges += extra_size;
+	}
+	else {
+		edges_vect.resize(nedges + extra_size);
+		edges = edges_vect.data();
 		nedges += extra_size;
 		edges_size = nedges;
 	}
