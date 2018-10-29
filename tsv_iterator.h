@@ -1,4 +1,4 @@
-/*
+/*  -*- C++ -*-
  * tsv_iterator.h -- helper class to read std::pair<unsinged int,unsigned int>
  * 	from a file and present it as an "iterator"
  * 
@@ -38,6 +38,7 @@
 #define TSV_ITERATOR_H
 
 #include "read_table.h"
+#include <memory>
 
 /* throw exception, but make sure it's displayed on stderr as well */
 static inline void handle_error(const char* msg) {
@@ -53,7 +54,8 @@ static inline void handle_error(const char* msg) {
  * an iterator of edges */
 class tsv_iterator : std::iterator<std::input_iterator_tag, std::pair<unsigned int,unsigned int> > {
 protected:
-	read_table2 rt;
+	std::shared_ptr<read_table2> p_rt; /* might be managed if it was created by this instance */
+	read_table2& rt; /* accessed through this */
 	uint64_t lines_max;
 	uint64_t header_skip;
 	bool is_end;
@@ -85,7 +87,7 @@ protected:
 	}
 	
 public:
-	tsv_iterator(FILE* in_, uint64_t header_skip_ = 0, uint64_t lines_max_ = 0, bool skip_overflow_ = false):rt(in_) {
+	tsv_iterator(FILE* in_, uint64_t header_skip_ = 0, uint64_t lines_max_ = 0, bool skip_overflow_ = false):p_rt(new read_table2(in_)),rt(*p_rt) {
 		header_skip = header_skip_;
 		skip_overflow = skip_overflow_;
 		for(uint64_t j=0;j<header_skip;j++) rt.read_line(false);

@@ -166,6 +166,8 @@ unsigned int graph::find_sccs(std::vector<unsigned int>& sccids) const {
 int graph::maxmatch_hk(std::vector<std::pair<unsigned int, unsigned int> >& res, bool use_r) const {
 	// Initialize result
     res.clear();
+    if(!nedges) return 0;
+    if(nedges == 1) { res.push_back(*edges_begin()); return 0; }
 	
 	// pairU[u] stores pair of u in matching where u
     // is a vertex on left side of Bipartite Graph.

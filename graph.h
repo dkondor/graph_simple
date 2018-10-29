@@ -1,4 +1,4 @@
-/*
+/*  -*- C++ -*-
  * graph.h -- simple graph implementation storing it as a list of edges
  * 	includes implementation for finding connected components of a symmetric graph
  * 	and an implementation of finding a maximum matching for a bipartite graph
@@ -144,6 +144,17 @@ class graph {
 		 */
 		int maxmatch_hk(std::vector<std::pair<unsigned int, unsigned int> >& res, bool use_r = false) const;
 	
+		/* get memory used by this class + working memory required for HK graph matching */
+		size_t get_memory_hk() const {
+			size_t mem = edges_size*sizeof(unsigned int); /* for edges array */
+			mem += nodes_size*sizeof(uint64_t); /* for idx array */
+			mem += nodes_size*sizeof(unsigned int); /* for outdeg array */
+			mem += sizeof(unsigned int)*(4*nnodes+nnodes_v+5); /* memory required for HK matching */
+			return mem;
+		}
+		
+		uint64_t num_edges() const { return nedges; }
+		unsigned int num_nodes() const { return nnodes; }
 		
 	protected:
 		unsigned int nnodes;
@@ -271,7 +282,7 @@ class graph {
 				bool operator !=(const edges_iterator_sentinel& it) const { return !is_end; }
 			protected:
 				std::pair<unsigned int,unsigned int> current;
-				unsigned int i;
+				size_t i;
 				unsigned int n;
 				const graph* g;
 				bool is_end;

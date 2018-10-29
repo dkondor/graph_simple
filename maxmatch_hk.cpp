@@ -24,6 +24,7 @@
 
 
 #include <stdio.h>
+#include <time.h>
 #include "graph.h"
 
 int main(int argc, char **argv)
@@ -44,13 +45,21 @@ int main(int argc, char **argv)
 	std::vector<unsigned int> ids;
 	graph g;
 	g.read_graph(stdin,partitioned,&ids);
+	fprintf(stderr,"%lu edges read, %lu total memory required\n",g.num_edges(),g.get_memory_hk());
 	
+	struct timespec t1;
+	clock_gettime(CLOCK_MONOTONIC,&t1);
 	std::vector<std::pair<unsigned int,unsigned int> > res;
 	g.maxmatch_hk(res,use_r);
+	struct timespec t2;
+	clock_gettime(CLOCK_MONOTONIC,&t2);
 	
 	for(auto it = res.begin(); it != res.end(); ++it) {
 		fprintf(stdout,"%u\t%u\n",ids[it->first],ids[it->second]);
 	}
+	
+	double runtime = t2.tv_sec - t1.tv_sec + (t2.tv_nsec - t1.tv_nsec) / 1e9;
+	fprintf(stderr,"%lu matches found, %f s total runtime\n",res.size(),runtime);
 	
 	return 0;
 }
