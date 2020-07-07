@@ -172,8 +172,17 @@ int graph::maxmatch_hk(std::vector<std::pair<unsigned int, unsigned int> >& res,
 	// pairU[u] stores pair of u in matching where u
     // is a vertex on left side of Bipartite Graph.
     // If u doesn't have any pair, then pairU[u] is NIL
-    unsigned int* pairU = (unsigned int*)malloc(sizeof(unsigned int)*(4*nnodes+nnodes_v+5));
+    unsigned int* pairU = (unsigned int*)malloc(sizeof(unsigned int)*(3*nnodes+nnodes_v+4));
     if(!pairU) return 1;
+    uint64_t* dfsQ = 0;
+    if(!use_r) {
+		dfsQ = (uint64_t*)malloc(sizeof(uint64_t)*(nnodes+1));
+		if(!dfsQ) {
+			free(pairU);
+			return 1;
+		}
+	}
+    
  
     // pairV[v] stores pair of v in matching. If v
     // doesn't have any pair, then pairU[v] is NIL
@@ -202,7 +211,7 @@ int graph::maxmatch_hk(std::vector<std::pair<unsigned int, unsigned int> >& res,
             // an augmenting path from current vertex
             if (pairU[u]==NIL) {
 				if(use_r) dfs(u,pairU,pairV,dist);
-				else dfs_nor(u,pairU,pairV,dist,Q);
+				else dfs_nor(u,pairU,pairV,dist,Q,dfsQ);
 			}
     
     
@@ -307,13 +316,13 @@ bool graph::dfs(unsigned int u, unsigned int* pairU, unsigned int* pairV, unsign
 
 /* dfs for maximum matching
  * Returns true if there is an augmenting path beginning with vertex u (non-recursive version) */
-void graph::dfs_nor(unsigned int u, unsigned int* pairU, unsigned int* pairV, unsigned int* dist, unsigned int* path) const {
+void graph::dfs_nor(unsigned int u, unsigned int* pairU, unsigned int* pairV, unsigned int* dist, unsigned int* path, uint64_t* ix) const {
 
 	const unsigned int INF = NIL+1; // note: path lengths will be < nnodes -> < NIL
-	unsigned int* ix = path + nnodes + 1;
+	//~ unsigned int* ix = path + nnodes + 1; -- note: ix provided as separate array as it needs to be 64-bit
 	
 	unsigned int l = 0;
-	unsigned int j = idx[u];
+	uint64_t j = idx[u];
 	while(1) {
 		// look at edges starting from u
 		bool v_found = false;

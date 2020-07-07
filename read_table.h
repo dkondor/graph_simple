@@ -83,8 +83,8 @@ f.close(); // close file separately -- r should not be used after this point
 
  */
 
-#ifndef _READ_TABLE_H
-#define _READ_TABLE_H
+#ifndef READ_TABLE_H
+#define READ_TABLE_H
 
 #include <stdio.h>
 #include <stdlib.h>
