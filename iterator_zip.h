@@ -70,10 +70,12 @@ struct refpair : std::pair<T1&,T2&> {
 	refpair<T1,T2>& operator = (const std::pair<T1,T2>& pair) {
 		first = pair.first;
 		second = pair.second;
+		return *this;
 	}
 	refpair<T1,T2>& operator = (std::pair<T1,T2>&& pair) {
 		first = std::move(pair.first);
 		second = std::move(pair.second);
+		return *this;
 	}
 	
 	void swap(refpair<T1,T2>& pair) {
